@@ -1,0 +1,42 @@
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Uploaded documents and generated reports
+backend/uploads/
+backend/storage/
+backend/generated/
+backend/reports/
+*.pptx
+
+# Node.js and frontend
+node_modules/
+dist/
+frontend/node_modules/
+frontend/dist/
+
+# IDE and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

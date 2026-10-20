@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+pydantic
+pandas
+openpyxl
+python-pptx
+pytest
+httpx
+python-multipart
+pypdf
+python-docx
+openai
+python-dotenv
+python-pptx>=1.0.2,<2

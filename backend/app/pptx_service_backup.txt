@@ -1,0 +1,205 @@
+
+from io import BytesIO
+from typing import Any
+
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
+
+
+NAVY = RGBColor(17, 34, 64)
+BLUE = RGBColor(37, 99, 235)
+
+
+def _as_dict(value: Any) -> dict:
+    if hasattr(value, "model_dump"):
+        return value.model_dump()
+    return value if isinstance(value, dict) else {}
+
+
+def _text(value: Any) -> str:
+    return str(value) if value is not None else "Not available"
+
+
+def _add_title(slide, title: str):
+    box = slide.shapes.add_textbox(
+        Inches(0.6), Inches(0.3),
+        Inches(11.8), Inches(0.7)
+    )
+    paragraph = box.text_frame.paragraphs[0]
+    paragraph.text = title
+    paragraph.font.size = Pt(26)
+    paragraph.font.bold = True
+    paragraph.font.color.rgb = NAVY
+
+
+def _add_bullets(slide, items: list, top=1.3):
+    box = slide.shapes.add_textbox(
+        Inches(0.8), Inches(top),
+        Inches(11.6), Inches(5.4)
+    )
+    frame = box.text_frame
+    frame.word_wrap = True
+
+    for index, item in enumerate(items[:8]):
+        paragraph = (
+            frame.paragraphs[0]
+            if index == 0
+            else frame.add_paragraph()
+        )
+        paragraph.text = str(item)
+        paragraph.font.size = Pt(18)
+        paragraph.space_after = Pt(16)
+
+
+def generate_qbr_pptx(
+    context: dict,
+    customer_name: str = "Customer",
+    period: str = "Quarterly Business Review",
+) -> bytes:
+    if not isinstance(context, dict):
+        raise ValueError("QBR context must be a dictionary")
+
+    presentation = Presentation()
+    presentation.slide_width = Inches(13.33)
+    presentation.slide_height = Inches(7.5)
+
+    # Slide 1: Title
+    slide = presentation.slides.add_slide(
+        presentation.slide_layouts[6]
+    )
+    _add_title(slide, "Quarterly Business Review")
+
+    title_box = slide.shapes.add_textbox(
+        Inches(0.9), Inches(2.2),
+        Inches(11.5), Inches(2.0)
+    )
+    frame = title_box.text_frame
+    frame.text = customer_name
+
+    frame.paragraphs[0].font.size = Pt(36)
+    frame.paragraphs[0].font.bold = True
+    frame.paragraphs[0].font.color.rgb = BLUE
+
+    paragraph = frame.add_paragraph()
+    paragraph.text = period
+    paragraph.font.size = Pt(22)
+
+    # Slide 2: Executive Summary
+    slide = presentation.slides.add_slide(
+        presentation.slide_layouts[6]
+    )
+    _add_title(slide, "Executive Summary")
+    _add_bullets(
+        slide,
+        [context.get("executive_summary", "No summary available")]
+    )
+
+    # Slide 3: KPI Performance
+    slide = presentation.slides.add_slide(
+        presentation.slide_layouts[6]
+    )
+    _add_title(slide, "KPI Performance")
+
+    kpi_items = []
+    for metric in context.get("kpi_details", []):
+        metric = _as_dict(metric)
+        kpi_items.append(
+            f"{_text(metric.get('metric'))}: "
+            f"{_text(metric.get('previous_value'))} → "
+            f"{_text(metric.get('current_value'))} "
+            f"{_text(metric.get('unit'))}"
+        )
+
+    _add_bullets(
+        slide,
+        kpi_items or ["No KPI data available"]
+    )
+
+    # Slide 4: Risks
+    slide = presentation.slides.add_slide(
+        presentation.slide_layouts[6]
+    )
+    _add_title(slide, "Key Risks and Target Breaches")
+
+    risks = []
+    for risk in context.get("prioritized_risks", []):
+        risk = _as_dict(risk)
+        risks.append(
+            f"{_text(risk.get('metric'))}: "
+            f"{_text(risk.get('reason'))}"
+        )
+
+    _add_bullets(slide, risks or ["No risks identified"])
+
+    # Slide 5: Historical Commitments
+    slide = presentation.slides.add_slide(
+        presentation.slide_layouts[6]
+    )
+    _add_title(slide, "Historical Commitments")
+
+    commitments = []
+    for item in context.get("commitments", []):
+        item = _as_dict(item)
+        commitments.append(
+            f"{_text(item.get('title'))} — "
+            f"{_text(item.get('effective_status', item.get('status')))}"
+        )
+
+    _add_bullets(
+        slide,
+        commitments or ["No commitments recorded"]
+    )
+
+    # Slide 6: Recommendations
+    slide = presentation.slides.add_slide(
+        presentation.slide_layouts[6]
+    )
+    _add_title(slide, "Recommendations")
+    _add_bullets(
+        slide,
+        context.get("recommendations", [])
+        or ["No recommendations available"]
+    )
+
+    # Slide 7: Customer Q&A
+    slide = presentation.slides.add_slide(
+        presentation.slide_layouts[6]
+    )
+    _add_title(slide, "Customer Q&A Preparation")
+
+    questions = context.get("questions", [])
+    qa_items = []
+    for question in questions[:5]:
+        question = _as_dict(question)
+        qa_items.append(
+            _text(question.get("customer_question"))
+        )
+
+    _add_bullets(
+        slide,
+        qa_items or ["Q&A preparation not included"]
+    )
+
+    # Slide 8: Evidence
+    slide = presentation.slides.add_slide(
+        presentation.slide_layouts[6]
+    )
+    _add_title(slide, "Evidence and References")
+
+    references = []
+    for item in context.get("kpi_evidence", []):
+        item = _as_dict(item)
+        references.append(
+            f"{_text(item.get('metric'))}: "
+            f"{_text(item.get('sources'))}"
+        )
+
+    _add_bullets(
+        slide,
+        references or ["No evidence references available"]
+    )
+
+    output = BytesIO()
+    presentation.save(output)
+    return output.getvalue()
