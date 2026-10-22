@@ -1,3 +1,4 @@
+import os
 from app.api.qa_coach import router as qa_coach_router
 from contextlib import asynccontextmanager
 
@@ -26,15 +27,26 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+# Allowed frontend origins
+allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# Production frontend URL from Render environment variables
+frontend_url = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
+
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=allowed_origins,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["*"],
 )
+
 
 app.include_router(health_router, prefix="/api")
 app.include_router(cases_router, prefix="/api")
