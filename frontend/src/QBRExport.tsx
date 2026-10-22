@@ -1,4 +1,4 @@
-
+import { apiUrl } from './services/apiConfig'
 import { useState } from 'react'
 
 interface QBRCase {
@@ -20,13 +20,16 @@ export default function QBRExport({ cases }: QBRExportProps) {
       ? selectedCaseId
       : cases[0]?.id ?? null
 
-  function handleDownload() {
-    if (activeCaseId === null) return
+  
 
-    window.location.assign(
-      `/api/cases/${activeCaseId}/export/pptx`
-    )
-  }
+function handleDownload() {
+  if (activeCaseId === null) return
+
+  window.location.assign(
+    apiUrl(`/api/cases/${activeCaseId}/export/pptx`)
+  )
+}
+
 
   return (
     <section className="workspace-panel qbr-export">

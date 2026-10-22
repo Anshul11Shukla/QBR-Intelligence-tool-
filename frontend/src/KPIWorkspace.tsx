@@ -1,4 +1,4 @@
-
+import { apiUrl } from './services/apiConfig'
 import { useEffect, useState, type FormEvent } from 'react'
 
 type KPIResult = {
@@ -41,7 +41,7 @@ export default function KPIWorkspace() {
 
   async function loadCases() {
     try {
-      const response = await fetch('/api/cases')
+      const response = await fetch(apiUrl('/api/cases'))
       if (!response.ok) throw new Error('Could not load workspaces')
       const data: CaseItem[] = await response.json()
       setCases(data)
@@ -93,13 +93,15 @@ export default function KPIWorkspace() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch(
-        `/api/cases/${caseId}/upload?period=${period}`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      )
+      
+const response = await fetch(
+  apiUrl(`/api/cases/${caseId}/upload?period=${period}`),
+  {
+    method: 'POST',
+    body: formData,
+  }
+)
+
 
       const result = await response.json()
 

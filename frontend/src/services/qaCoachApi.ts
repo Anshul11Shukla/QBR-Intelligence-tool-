@@ -1,4 +1,4 @@
-
+import { apiUrl } from './apiConfig'
 export interface SourceReference {
   period?: string;
   source?: string;
@@ -31,17 +31,12 @@ export interface QACoachResponse {
   generation_mode: string;
 }
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://127.0.0.1:8000"
-).replace(/\/$/, "");
-
 export async function fetchQACoach(
   caseId: number
 ): Promise<QACoachResponse> {
   const response = await fetch(
-    `${API_BASE_URL}/api/cases/${caseId}/qa-coach`
-  );
+  apiUrl(`/api/cases/${caseId}/qa-coach`)
+)
 
   if (!response.ok) {
     throw new Error(

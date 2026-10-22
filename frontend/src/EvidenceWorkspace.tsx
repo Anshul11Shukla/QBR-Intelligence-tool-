@@ -1,4 +1,4 @@
-
+import { apiUrl } from './services/apiConfig'
 import { useEffect, useState, type FormEvent } from 'react'
 
 type CaseItem = {
@@ -47,7 +47,7 @@ async function apiRequest<T>(
   url: string,
   options?: RequestInit
 ): Promise<T> {
-  const response = await fetch(url, options)
+ const response = await fetch(apiUrl(url), options)
   const data = await response.json()
 
   if (!response.ok) {

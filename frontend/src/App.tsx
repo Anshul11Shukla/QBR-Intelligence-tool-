@@ -1,8 +1,10 @@
+import { apiUrl } from './services/apiConfig'
 import QBRExport from './QBRExport'
 import QACoachWorkspace from './QACoachWorkspace'
 import KPIWorkspace from './KPIWorkspace'
 import { useEffect, useState, type FormEvent } from 'react'
 import EvidenceWorkspace from './EvidenceWorkspace'
+
 
 type HealthResponse = {
   status: string
@@ -28,7 +30,7 @@ export default function App() {
 
   async function loadCases() {
     try {
-      const response = await fetch('/api/cases')
+      const response = await fetch(apiUrl('/api/cases'))
       if (!response.ok) throw new Error('Unable to load workspaces')
       setCases(await response.json())
     } catch {
@@ -37,7 +39,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    fetch('/api/health')
+    fetch(apiUrl('/api/health'))
       .then(async (response) => {
         if (!response.ok) throw new Error('Backend unavailable')
         return response.json() as Promise<HealthResponse>
@@ -54,7 +56,7 @@ export default function App() {
     setMessage('')
 
     try {
-      const response = await fetch('/api/cases', {
+      const response = await fetch(apiUrl('/api/cases'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
