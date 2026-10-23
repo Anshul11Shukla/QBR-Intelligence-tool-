@@ -61,7 +61,7 @@ export default function KPIWorkspace() {
     if (!id) return
 
     try {
-      const response = await fetch(`/api/cases/${id}/analytics`)
+      const response = await fetch(apiUrl(`/api/cases/${id}/analytics`))
       if (!response.ok) throw new Error('Could not load KPI analysis')
       const data: Analysis = await response.json()
       setAnalysis(data)
